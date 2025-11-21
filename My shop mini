@@ -1,0 +1,166 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyShopMini());
+}
+
+class MyShopMini extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'MyShop Mini',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: HomePage(),
+    );
+  }
+}
+
+//
+// -------------------------------------
+// HOME PAGE (Daftar Kategori)
+// -------------------------------------
+//
+class HomePage extends StatelessWidget {
+  final List<String> categories = [
+    "Makanan",
+    "Minuman",
+    "Elektronik",
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("MyShop Mini")),
+      body: ListView.builder(
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(categories[index]),
+            trailing: Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      ProductListPage(category: categories[index]),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+//
+// -------------------------------------
+// PRODUCT LIST PAGE (Grid Produk)
+// -------------------------------------
+//
+class ProductListPage extends StatelessWidget {
+  final String category;
+
+  ProductListPage({required this.category});
+
+  final Map<String, List<Map<String, dynamic>>> productData = {
+    "Makanan": [
+      {"name": "Burger", "price": 25000, "icon": Icons.fastfood},
+      {"name": "Pizza", "price": 50000, "icon": Icons.local_pizza},
+    ],
+    "Minuman": [
+      {"name": "Es Teh", "price": 8000, "icon": Icons.local_drink},
+      {"name": "Kopi", "price": 15000, "icon": Icons.coffee},
+    ],
+    "Elektronik": [
+      {"name": "Laptop", "price": 7500000, "icon": Icons.computer},
+      {"name": "Headset", "price": 250000, "icon": Icons.headset},
+    ],
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final products = productData[category] ?? [];
+
+    return Scaffold(
+      appBar: AppBar(title: Text("Kategori: $category")),
+      body: GridView.builder(
+        padding: EdgeInsets.all(10),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 3 / 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemCount: products.length,
+        itemBuilder: (_, index) {
+          final product = products[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProductDetailPage(
+                    name: product['name'],
+                    price: product['price'],
+                    icon: product['icon'],
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.blue.shade100,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(product['icon'], size: 40),
+                  SizedBox(height: 10),
+                  Text(product['name']),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+//
+// -------------------------------------
+// PRODUCT DETAIL PAGE (Detail Produk)
+// -------------------------------------
+//
+class ProductDetailPage extends StatelessWidget {
+  final String name;
+  final int price;
+  final IconData icon;
+
+  ProductDetailPage({
+    required this.name,
+    required this.price,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Detail Produk")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 100, color: Colors.blue),
+            SizedBox(height: 20),
+            Text(name, style: TextStyle(fontSize: 24)),
+            SizedBox(height: 10),
+            Text("Rp $price", style: TextStyle(fontSize: 20)),
+          ],
+        ),
+      ),
+    );
+  }
+}
