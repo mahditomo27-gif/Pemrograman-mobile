@@ -1,0 +1,49 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Profil Mahasiswa')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 60,
+                // backgroundImage: AssetImage('images/219983.png'),
+                backgroundImage: const NetworkImage(
+                  'https://cdn-icons-png.flaticon.com/512/219/219983.png',
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Mochammad Fauzan',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Text('Mahasiswa Informatika'),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () {
+                  print('Lihat Detail ditekan');
+                },
+                icon: const Icon(Icons.info),
+                label: const Text('Lihat Detail'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
