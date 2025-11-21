@@ -1,0 +1,255 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+/// Contoh data model sederhana untuk produk
+class Product {
+  final String id;
+  final String name;
+  final double price;
+  final String? imageUrl; // bila null -> tampilkan icon
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.price,
+    this.imageUrl,
+  });
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Grid Produk Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+      ),
+      home: const ProductGridPage(),
+    );
+  }
+}
+
+class ProductGridPage extends StatelessWidget {
+  const ProductGridPage({super.key});
+
+  // Contoh daftar produk
+  List<Product> get sampleProducts => [
+        Product(
+          id: 'p1',
+          name: 'Kopi Tubruk',
+          price: 15000,
+          imageUrl:
+              'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80',
+        ),
+        Product(
+          id: 'p2',
+          name: 'Botol Minum',
+          price: 85000,
+          imageUrl:
+              'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800&q=80',
+        ),
+        Product(
+          id: 'p3',
+          name: 'Headphone',
+          price: 350000,
+          imageUrl:
+              'https://images.unsplash.com/photo-1518444025973-8a1b09134f9f?w=800&q=80',
+        ),
+        Product(
+          id: 'p4',
+          name: 'Snack Rasa Keju',
+          price: 12000,
+          imageUrl: null, // menampilkan icon jika imageUrl null
+        ),
+        Product(
+          id: 'p5',
+          name: 'Powerbank',
+          price: 129000,
+          imageUrl:
+              'https://images.unsplash.com/photo-1585386959984-a4155220c3b9?w=800&q=80',
+        ),
+        Product(
+          id: 'p6',
+          name: 'Cangkir Keramik',
+          price: 45000,
+          imageUrl: null,
+        ),
+      ];
+
+  String formatRupiah(double value) {
+    final f = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    return f.format(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final products = sampleProducts;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Daftar Produk (Grid)'),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        child: GridView.builder(
+          itemCount: products.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2, // minimal 2 kolom
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.72, // atur tinggi item
+          ),
+          itemBuilder: (context, index) {
+            final p = products[index];
+            return ProductCard(
+              product: p,
+              priceText: formatRupiah(p.price),
+              onTap: () {
+                // contoh aksi saat diklik
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Klik: ${p.name}')),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// Widget kartu produk dengan bayangan halus dan sudut membulat
+class ProductCard extends StatelessWidget {
+  final Product product;
+  final String priceText;
+  final VoidCallback? onTap;
+
+  const ProductCard({
+    super.key,
+    required this.product,
+    required this.priceText,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Ukuran gambar/avatar
+    const double imageHeight = 120;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(14),
+          // efek bayangan halus
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.025),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // area gambar / icon
+              Container(
+                height: imageHeight,
+                alignment: Alignment.center,
+                child: product.imageUrl != null
+                    ? AspectRatio(
+                        aspectRatio: 1.4,
+                        child: Image.network(
+                          product.imageUrl!,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, chunk) {
+                            if (chunk == null) return child;
+                            return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.broken_image, size: 48);
+                          },
+                        ),
+                      )
+                    : CircleAvatar(
+                        radius: 34,
+                        backgroundColor: Colors.indigo.shade50,
+                        child: Icon(
+                          Icons.shopping_bag_rounded,
+                          size: 36,
+                          color: Colors.indigo.shade700,
+                        ),
+                      ),
+              ),
+
+              // content: nama & harga
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Nama produk (maks 2 baris)
+                      Text(
+                        product.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      // Harga
+                      Text(
+                        priceText,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: Colors.green.shade700,
+                        ),
+                      ),
+                      const Spacer(),
+                      // Tombol atau label kecil (opsional)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ElevatedButton(
+                            onPressed: onTap,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              elevation: 2,
+                            ),
+                            child: const Text('Beli', style: TextStyle(fontSize: 13)),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
